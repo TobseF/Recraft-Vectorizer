@@ -1,0 +1,14 @@
+customtkinter>=5.2.0
+Pillow>=10.0.0
+requests>=2.31.0
+
+# Drag & drop of files from the OS file manager onto the window.
+tkinterdnd2>=0.4.0
+
+# SVG preview rendering.
+# resvg is a browser-faithful renderer (handles gradients, clip-paths, etc.)
+# and ships self-contained wheels, so no system libraries are needed.
+resvg-py>=0.1.5
+
+# Fallback renderer, used only if resvg is unavailable. Self-contained wheels.
+pymupdf>=1.24.0
