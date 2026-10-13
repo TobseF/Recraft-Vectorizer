@@ -12,3 +12,6 @@ resvg-py>=0.1.5
 
 # Fallback renderer, used only if resvg is unavailable. Self-contained wheels.
 pymupdf>=1.24.0
+
+# SVG minifier: pure-Python port of SVGO 4.1 (no Node.js needed).
+svgo-py>=4.1.0.1

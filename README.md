@@ -26,8 +26,15 @@ toggle.
   faster uploads and smaller requests.
 - **In-app preview** with an **Original / SVG toggle** so you can compare before
   and after.
-- **File-size info** for the input, the uploaded image, and the resulting SVG.
-- **Save as…** to export the SVG anywhere.
+- **Optional SVG minification (SVGO)** — switch on *Optimize with SVGO* to shrink
+  the result after conversion. A **Settings…** panel (modelled on
+  [SVGOMG](https://github.com/svg/svgo)) exposes all SVGO plugins plus number /
+  transform precision, multipass and prettify, with a **live preview** and size
+  read-out that update as you tweak. Runs the real SVGO code (see below).
+- **File-size info** for the input, the uploaded image, and the resulting SVG,
+  including the **percentage saved** by minification.
+- **Save as…** to export the SVG anywhere (optimized files are suggested as
+  `*.min.svg`).
 - **Settings dialog** to store your API key, a default download folder, and the
   default model.
 - **Dark theme** with a red accent.
@@ -72,7 +79,10 @@ python recraft_vectorizer.py
    The shorter edge is never scaled below **256 px** (Recraft's minimum).
 4. Pick a **Model** — hover the **ⓘ** icon to compare quality and price.
 5. Click **Convert to SVG**. When finished, the preview switches to the SVG.
-6. Use the **Original / SVG** toggle to compare, and **Save SVG as…** to export.
+6. *(Optional)* Tick **Optimize with SVGO** to minify the result, and open its
+   **Settings…** to fine-tune plugins and precision — the preview and size
+   read-out update live.
+7. Use the **Original / SVG** toggle to compare, and **Save SVG as…** to export.
 
 ---
 
@@ -97,6 +107,21 @@ way the text-to-image generation endpoints do. A style dropdown would therefore
 have been misleading, so it was removed. If you want a *stylized* redraw rather
 than a faithful trace, that is a different Recraft endpoint (image generation /
 image-to-image) and a possible future addition.
+
+### SVG minification (SVGO)
+
+The optional minifier uses [`svgo-py`](https://pypi.org/project/svgo-py/), a
+pure-Python 1:1 port of SVGO 4.1 (no Node.js required). It runs in a separate
+worker process so the UI stays responsive. The plugin catalogue and the way
+settings become an SVGO plugin list follow SVGOMG, so output matches for the
+same settings.
+
+The **Settings…** panel lists every feature in collapsible groups (with an
+*n/m* counter per group), a filter box, *Collapse all* and *Reset* (back to
+SVGO's preset-default). Global options: *number precision* (default 3),
+*transform precision* (default 5), *multipass* and *prettify*. Changes are
+debounced and re-optimized live. If SVGO errors on a document the app falls back
+to the unmodified SVG.
 
 ---
 
@@ -124,6 +149,7 @@ the file private and revoke/rotate the key from your Recraft account if needed.
 | Preview shows *"Preview could not be rendered"* | Reinstall requirements (`resvg-py`); the SVG still converted fine — only the on-screen preview is missing. |
 | Drag & drop does nothing | Ensure `tkinterdnd2` is installed in the active environment. |
 | Window looks unstyled | Ensure `customtkinter` is installed in the active environment. |
+| *"SVGO failed — showing original"* | SVGO rejected that document; the original SVG is kept. Try toggling off the plugin that fails, or lower precision. |
 
 ---
 
@@ -131,8 +157,9 @@ the file private and revoke/rotate the key from your Recraft account if needed.
 
 ```
 recraft-vector/
-├── recraft_vectorizer.py   # the application (single file)
-├── requirements.txt        # dependencies
+├── recraft_vectorizer.py   # the application (UI + Recraft client)
+├── svgo_engine.py          # svgo-py bridge (feature catalogue, settings, runner)
+├── requirements.txt        # Python dependencies
 └── README.md
 ```
 

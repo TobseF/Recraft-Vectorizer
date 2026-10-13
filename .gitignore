@@ -2,3 +2,8 @@ __pycache__/
 .venv/
 *.pyc
 
+# Node deps / build output pulled into the upstream SVGO reference copy when
+# rebuilding the bundle (not needed at runtime).
+node_modules/
+svgo-main/dist/
+
