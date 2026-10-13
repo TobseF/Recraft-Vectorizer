@@ -7,3 +7,10 @@ __pycache__/
 node_modules/
 svgo-main/dist/
 
+
+# Packaging output
+build/
+dist/
+*.egg-info/
+.idea/
+icon/icon.ico

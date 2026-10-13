@@ -1,4 +1,4 @@
-# Recraft Vectorizer
+# <img src="icon/icon.svg" height="32"/> Recraft Vectorizer
 
 A small desktop GUI for converting local raster images (PNG, JPG, WebP, …) into
 scalable **SVG** vector graphics using the [Recraft API](https://www.recraft.ai/docs/api-reference/examples).
@@ -153,13 +153,48 @@ the file private and revoke/rotate the key from your Recraft account if needed.
 
 ---
 
+## Building a standalone app / installer
+
+`build.py` compiles the app with [Nuitka](https://nuitka.net/) into a native
+program and packages it as a portable archive plus an installer. It builds for
+the platform it runs on:
+
+```bash
+pip install -r requirements.txt -r requirements-build.txt
+python build.py                  # compile, portable archive, installer
+python build.py --no-installer   # skip Inno Setup / appimagetool
+python build.py --clean          # discard previous artefacts first
+```
+
+**Windows** needs a C compiler (Visual Studio C++ tools, otherwise Nuitka
+downloads MinGW64) and, for the installer, [Inno Setup](https://jrsoftware.org/isinfo.php)
+(`winget install -e --id JRSoftware.InnoSetup`). Output in `dist/windows-x64/`:
+
+- `RecraftVectorizer-<version>-Setup.exe` (installer, `installer/recraft-vectorizer.iss`)
+- `RecraftVectorizer-<version>-windows-x64-portable.zip`
+
+**Linux from Windows** via Docker Desktop (builds natively in an Ubuntu 22.04
+container, so the result runs on any newer distro):
+
+```bash
+docker compose build build-linux     # once
+docker compose run --rm build-linux
+```
+
+Output in `dist/linux-x64/`: an `.AppImage` and a `.tar.gz`. See
+[docker/README.md](docker/README.md) for details.
+
 ## Project layout
 
 ```
 recraft-vector/
 ├── recraft_vectorizer.py   # the application (UI + Recraft client)
 ├── svgo_engine.py          # svgo-py bridge (feature catalogue, settings, runner)
+├── build.py                # Nuitka build + portable archive + installer
+├── docker-compose.yml      # Linux build from any host (docker/)
+├── installer/              # Inno Setup script (Windows installer)
 ├── requirements.txt        # Python dependencies
+├── requirements-build.txt  # Build-time dependencies (Nuitka)
 └── README.md
 ```
 

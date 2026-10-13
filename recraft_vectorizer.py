@@ -35,7 +35,7 @@ from tkinter import filedialog, messagebox
 
 import customtkinter as ctk
 import requests
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageTk
 
 import svgo_engine as engine
 
@@ -52,11 +52,16 @@ except Exception:  # pragma: no cover - optional dependency
 # --------------------------------------------------------------------------- #
 
 APP_NAME = "Recraft Vectorizer"
+APP_SLOGAN = "Convert images to SVG with Recraft"
+APP_VERSION = "1.0.0"
+APP_PUBLISHER = "Tobse"
 API_BASE = "https://external.api.recraft.ai/v1"
 VECTORIZE_URL = f"{API_BASE}/images/vectorize"
 
 APP_DIR = Path(__file__).resolve().parent if "__file__" in globals() else Path.cwd()
 ICON_SETTINGS_PATH = APP_DIR / "icon" / "settings.svg"
+ICON_PNG = APP_DIR / "icon" / "icon.png"
+ICON_ICO = APP_DIR / "icon" / "icon.ico"
 
 CONFIG_DIR = Path.home() / ".recraft_vectorizer"
 CONFIG_PATH = CONFIG_DIR / "config.json"
@@ -212,6 +217,25 @@ def load_svg_icon(
         return ctk.CTkImage(light_image=pil_img, dark_image=pil_img, size=size)
     except Exception:
         return None
+
+
+def apply_window_icon(window: tk.Misc) -> None:
+    """Use icon/icon.png for the title bar, task bar and all later dialogs."""
+    # CustomTkinter would otherwise replace the icon with its own after 200 ms.
+    setattr(window, "_iconbitmap_method_called", True)
+    if ICON_PNG.is_file():
+        try:
+            photo = ImageTk.PhotoImage(Image.open(ICON_PNG))
+            window.iconphoto(True, photo)
+            window._app_icon = photo  # Tk does not keep its own reference
+        except Exception:
+            pass
+    if sys.platform == "win32" and ICON_ICO.is_file():
+        try:
+            window.iconbitmap(str(ICON_ICO))
+            window.iconbitmap(default=str(ICON_ICO))
+        except Exception:
+            pass
 
 
 # --------------------------------------------------------------------------- #
@@ -856,6 +880,7 @@ class App(*_AppBase):  # type: ignore[misc]
         self.config_ref = Config()
 
         self.title(APP_NAME)
+        apply_window_icon(self)
         self.geometry("1120x780")
         self.minsize(980, 700)
         self.configure(fg_color=COL_BG)
@@ -1554,4 +1579,9 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    # A compiled build re-launches itself for the SVGO worker process; this makes
+    # that relaunch run as a worker instead of opening a second window.
+    import multiprocessing
+
+    multiprocessing.freeze_support()
     main()
